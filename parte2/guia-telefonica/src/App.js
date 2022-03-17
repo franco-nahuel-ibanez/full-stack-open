@@ -1,30 +1,33 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Number from './Number';
 import Filter from './Filter';
 import PersonForm from './PersonForm';
+import axios from 'axios';
+
 
 const App = () => {
-    
-    const [ persons, setPersons ] = useState([
-        { name: 'Arto Hellas', number: '040-123456' },
-        { name: 'Ada Lovelace', number: '39-44-5323523' },
-        { name: 'Dan Abramov', number: '12-43-234345' },
-        { name: 'Mary Poppendieck', number: '39-23-6423122' }
-    ])
-
+    const [ persons, setPersons ] = useState([])
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber] = useState('');
     const [ query, setQuery ] = useState('');
 
+    useEffect( () => {
+        (async function() {
+            const res = await axios.get('http://localhost:3001/persons');
+            setPersons( res.data );
+        })()
+    }, [])
+
+
     const handlerClick = (e) => {
         e.preventDefault();
         const added = persons.some( person => person.name === newName.trim() );
-        
+
         if(newName.trim() === '' || newNumber.trim() === '' ) return alert('All fields are required')
-        if(added) return alert(`${newName} is alredy added to phonebook`); 
-        
+        if(added) return alert(`${newName} is alredy added to phonebook`);
+
         setPersons([
-            ...persons, 
+            ...persons,
             {name: newName, number: newNumber} 
         ]);
 
@@ -37,11 +40,10 @@ const App = () => {
         : persons.filter( person => person.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()) )
 
     
-
     return (
       <div>
         <h2>Phonebook</h2>
-        
+
         <Filter query={query} setQuery={setQuery} />
 
         <h2>Add a New</h2>
